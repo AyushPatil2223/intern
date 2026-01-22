@@ -13,16 +13,37 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
 
+    // @Override
+    // public void addCorsMappings(CorsRegistry registry) {
+    //     registry.addMapping("/**")
+    //             .allowedOriginPatterns("*")   // Use this for wildcard
+    //             .allowedMethods("*")
+    //             .allowedHeaders("*")
+    //             .allowCredentials(true)
+    //             .exposedHeaders("Authorization")
+    //             .maxAge(3600);
+    // }
+
+
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOriginPatterns("*")   // Use this for wildcard
-                .allowedMethods("*")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .exposedHeaders("Authorization")
-                .maxAge(3600);
-    }
+public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/**")
+        .allowedOrigins(
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+            "http://192.168.1.100:8080" ,  // 🔁 replace with your actual IP
+            "http://172.20.10.2:8080",
+                        "https://uat.indianoil.co.in",
+                                  "https://spandan.indianoil.co.in"
+            
+        )
+        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        .allowedHeaders("*")
+        .allowCredentials(true)
+        .exposedHeaders("Authorization")
+        .maxAge(3600);
+}
+
 
 
 

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -30,7 +31,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
+// @CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class JwtController {
 
 
@@ -53,7 +54,7 @@ private UserLoginRepository userLoginRepository;
 	
 	@PostMapping("/token")
 	public ResponseEntity<?> generateToken(@RequestBody EmpLoginReq jwtRequest,
-	                                       HttpServletResponse response, HttpSession session) {
+	                                       HttpServletResponse response, HttpSession session, HttpServletRequest request) {
 
 
 	
@@ -62,23 +63,59 @@ System.out.println("Session Captcha   = " + session.getAttribute("captcha"));
 System.out.println("Request Captcha   = " + jwtRequest.getCaptcha());
 
 
-	    // Step 1: Validate Captcha
-	    String sessionCaptcha = (String) session.getAttribute("captcha");
-	    System.out.println("Session Captcha = " + sessionCaptcha);
+// 	    // Step 1: Validate Captcha
+// 	    String sessionCaptcha = (String) session.getAttribute("captcha");
+// 	    System.out.println("Session Captcha = " + sessionCaptcha);
 
-	    // Allow default 123
-	    if (!"123".equalsIgnoreCase(jwtRequest.getCaptcha())) {
+// 	    // Allow default 123
+// 	    if (!"123".equalsIgnoreCase(jwtRequest.getCaptcha())) {
 
-	        if (sessionCaptcha == null || !sessionCaptcha.equalsIgnoreCase(jwtRequest.getCaptcha())) {
-//	            System.out.println("INVALID CAPTCHA");
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Captcha");
-	        }
-	    }
+// 	        if (sessionCaptcha == null || !sessionCaptcha.equalsIgnoreCase(jwtRequest.getCaptcha())) {
+// //	            System.out.println("INVALID CAPTCHA");
+// 	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Captcha");
+// 	        }
+// 	    }
 
-	    session.removeAttribute("captcha");
-//	    System.out.println("Captcha validation passed");
+// 	    session.removeAttribute("captcha");
+// //	    System.out.println("Captcha validation passed");
 
-   System.out.println("Received password from UI: " + jwtRequest.getPassword());
+//    System.out.println("Received password from UI: " + jwtRequest.getPassword());
+
+
+
+
+
+
+
+
+
+// Check if request is HTTPS
+boolean isHttps = request.isSecure();
+
+// Step 1: Validate Captcha (ONLY FOR HTTPS)
+if (isHttps) {
+
+    String sessionCaptcha = (String) session.getAttribute("captcha");
+    System.out.println("Session Captcha = " + sessionCaptcha);
+
+    // Allow default 123
+    if (!"123".equalsIgnoreCase(jwtRequest.getCaptcha())) {
+
+        if (sessionCaptcha == null || 
+            !sessionCaptcha.equalsIgnoreCase(jwtRequest.getCaptcha())) {
+
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid Captcha");
+        }
+    }
+
+    session.removeAttribute("captcha");
+}
+
+// Password log (unchanged)
+System.out.println("Received password from UI: " + jwtRequest.getPassword());
+
 
 	    // Step 2: Decrypt password
 	    String decryptedPassword;
@@ -155,12 +192,27 @@ if (!user.getPassword().equals(decryptedPassword)) {
 	    // Step 6: Add new cookie
 	    Cookie jwtCookie = new Cookie("jwt", token);
 	    jwtCookie.setHttpOnly(true);
-	    jwtCookie.setSecure(true);   //true
+	    jwtCookie.setSecure(false);   //true
 	    jwtCookie.setPath("/");
 	    jwtCookie.setMaxAge(24 * 60 * 60);
 	    response.addCookie(jwtCookie);
 	    
 	    System.out.println(token);
+
+
+
+
+
+// 		String cookieHeader =
+//         "jwt=" + token +
+//         "; Path=/" +
+//         "; Max-Age=86400" +
+//         "; HttpOnly" +
+//         "; Secure" +
+//         "; SameSite=None";
+
+// response.addHeader("Set-Cookie", cookieHeader);
+
 
 //	    System.out.println("JWT Token Created Successfully");
 
@@ -212,7 +264,7 @@ if (!user.getPassword().equals(decryptedPassword)) {
 	    // Delete the JWT cookie
 	    Cookie jwtCookie = new Cookie("jwt", null);
 	    jwtCookie.setHttpOnly(true);
-	    jwtCookie.setSecure(false); // dev only, true in prod
+	    jwtCookie.setSecure(true); // dev only, true in prod
 	    jwtCookie.setPath("/");
 	    jwtCookie.setMaxAge(0); // delete immediately
 	    response.addCookie(jwtCookie);

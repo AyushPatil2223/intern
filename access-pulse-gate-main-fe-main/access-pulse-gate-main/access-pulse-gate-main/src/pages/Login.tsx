@@ -137,6 +137,8 @@ const onSubmit = async (data: LoginCredentials) => {
         captcha: data.captcha,
       });
     } else if (data.username.length === 10) {
+
+      
       // User login
       const userData: UserLoginCredentials = {
         mobile: data.username,

@@ -86,13 +86,33 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-        });
-      },
+      // logout: () => {
+      //   set({
+      //     user: null,
+      //     token: null,
+      //     isAuthenticated: false,
+      //   });
+      // },
+
+
+      logout: async () => {
+  try {
+    await authApi.logout(); // 🔥 backend logout
+  } catch (e) {
+    console.error("Logout API failed", e);
+  }
+
+  set({
+    employee: null,
+    user: null,
+    token: null,
+    role: null,
+    isAuthenticated: false,
+  });
+
+  sessionStorage.clear();
+},
+
 
       setUser: (user: User | null) => {
         set({ user });

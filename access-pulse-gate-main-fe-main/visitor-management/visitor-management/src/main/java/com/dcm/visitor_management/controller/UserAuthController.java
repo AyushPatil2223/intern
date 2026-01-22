@@ -1,6 +1,7 @@
 package com.dcm.visitor_management.controller;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -20,9 +21,60 @@ import com.dcm.visitor_management.service.UserService;
 
 
 
+// @RestController
+// @RequestMapping("/auth")
+// @CrossOrigin(originPatterns = "*", allowCredentials = "true")
+// public class UserAuthController {
+
+//     @Autowired
+//     private UserService userService;
+
+//     @PostMapping("/userLogin")
+//     public ResponseEntity<UserLoginResponse> login(
+//             @RequestBody UserLoginRequest request,
+//             HttpServletResponse servletResponse,
+//             HttpSession session) {
+
+//         UserLoginResponse response = userService.login(request, session);
+
+//         if (response.getToken() != null) {
+
+//             String cookieValue = "jwt=" + response.getToken()
+//                     + "; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=" + (60 * 60);
+
+//             servletResponse.addHeader("Set-Cookie", cookieValue);
+
+//             return ResponseEntity.ok(
+//                     new UserLoginResponse(
+//                             response.getStatus(),   // status
+//                             response.getToken(),   // ✔ FIXED
+//                             response.getUsername(),  // username
+//                             response.getMobile(),
+//                             response.getRole()
+//                     )
+//             );
+//         } else {
+//             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+//         }
+//     }
+
+//     @PostMapping("/userLogout")
+//     public ResponseEntity<?> logout(HttpServletResponse response) {
+
+//         Cookie cookie = new Cookie("jwt", null);
+//         cookie.setHttpOnly(true);
+//         cookie.setSecure(true);
+//         cookie.setPath("/");
+//         cookie.setMaxAge(0);
+//         response.addCookie(cookie);
+
+//         return ResponseEntity.ok(new ApiResponse(true, "Logout successful", null));
+//     }
+// }
+
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
+// @CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class UserAuthController {
 
     @Autowired
@@ -31,38 +83,41 @@ public class UserAuthController {
     @PostMapping("/userLogin")
     public ResponseEntity<UserLoginResponse> login(
             @RequestBody UserLoginRequest request,
-            HttpServletResponse servletResponse,
-            HttpSession session) {
+            HttpServletResponse response,
+            HttpSession session,
+            HttpServletRequest httpRequest) {
 
-        UserLoginResponse response = userService.login(request, session);
+        boolean isHttps = httpRequest.isSecure();
 
-        if (response.getToken() != null) {
+        UserLoginResponse loginResponse = userService.login(request, session);
 
-            String cookieValue = "jwt=" + response.getToken()
-                    + "; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=" + (60 * 60);
-
-            servletResponse.addHeader("Set-Cookie", cookieValue);
-
-            return ResponseEntity.ok(
-                    new UserLoginResponse(
-                            response.getStatus(),   // status
-                            response.getToken(),   // ✔ FIXED
-                            response.getUsername(),  // username
-                            response.getMobile(),
-                            response.getRole()
-                    )
-            );
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        // ❌ Login failed
+        if (loginResponse.getToken() == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(loginResponse);
         }
+
+        // ✅ JWT Cookie
+        String cookie =
+                "jwt=" + loginResponse.getToken() +
+                "; HttpOnly;" +
+                (isHttps ? " Secure;" : "") +
+                " SameSite=None; Path=/; Max-Age=3600";
+
+        response.addHeader("Set-Cookie", cookie);
+
+        return ResponseEntity.ok(loginResponse);
     }
 
     @PostMapping("/userLogout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
+    public ResponseEntity<?> logout(HttpServletResponse response, HttpServletRequest request) {
+
+        boolean isHttps = request.isSecure();
 
         Cookie cookie = new Cookie("jwt", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(isHttps);
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
@@ -70,4 +125,3 @@ public class UserAuthController {
         return ResponseEntity.ok(new ApiResponse(true, "Logout successful", null));
     }
 }
-

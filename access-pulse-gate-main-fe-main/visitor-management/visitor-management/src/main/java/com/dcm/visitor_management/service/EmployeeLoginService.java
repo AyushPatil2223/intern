@@ -119,7 +119,8 @@ private EmployeeCheckRepository employeeCheckRepository;
                         HashMap<String, Object> map = new HashMap<>();
                        // map.put("emp_code", rs.getInt("emp_code"));
 
-                               String empCodeStr = String.valueOf(rs.getInt("emp_code"));
+                            //    String empCodeStr = String.valueOf(rs.getInt("emp_code"));
+                              String empCodeStr = rs.getString("emp_code");
                               map.put("emp_code", empCodeStr);
 
                         map.put("loc_code", rs.getString("loc_code"));
@@ -152,7 +153,8 @@ private EmployeeCheckRepository employeeCheckRepository;
 
                         
                     },
-                    Integer.parseInt(empCode)   
+                    // Integer.parseInt(empCode)   
+                    empCode
             );
         } catch (Exception e) {
             e.printStackTrace();                 

@@ -16,7 +16,8 @@ import java.util.Date;
 public class EmployeeEntity {
 	@Id
 	@Column(name = "emp_code")
-	private int empCode;
+	// private int empCode;\
+   private String empCode;
 
     private String loc_code;
     private String loc_name;
@@ -48,11 +49,11 @@ public class EmployeeEntity {
 
 
 
-    public int getEmpCode() {
+    public String getEmpCode() {
     return empCode;
 }
 
-public void setEmpCode(int empCode) {
+public void setEmpCode(String empCode) {
     this.empCode = empCode;
 }
 

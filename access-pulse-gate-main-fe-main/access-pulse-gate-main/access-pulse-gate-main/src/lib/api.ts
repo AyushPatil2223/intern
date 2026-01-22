@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       sessionStorage.removeItem('auth-storage');
-      window.location.href = '/login';
+      window.location.href = '/dcm/login';
     }
     return Promise.reject(error);
   }
@@ -59,8 +59,11 @@ export const authApi = {
     apiClient.post("/auth/userLogout", {}, { withCredentials: true }),
 
 
-  logout: () =>
-    apiClient.post('/auth/logout', {}, { withCredentials: true }),
+  // logout: () =>
+  //   apiClient.post('/auth/logout', {}, { withCredentials: true }),
+
+    logout: () =>
+    apiClient.post('/auth/empLogout', {}, { withCredentials: true }),
 };
 
 

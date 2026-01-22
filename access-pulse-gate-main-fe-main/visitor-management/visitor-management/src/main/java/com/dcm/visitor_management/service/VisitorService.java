@@ -136,6 +136,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -290,7 +292,10 @@ String identifier = auth.getName();
 
             
 if (visitor.getPunchOutTime() != null) {
-    dto.setpunchOutDateTime(visitor.getPunchOutTime().toString());
+    // dto.setpunchOutDateTime(visitor.getPunchOutTime().toString());
+ dto.setpunchOutDateTime(visitor.getPunchOutTime().toString());
+
+
 } else {
     dto.setpunchOutDateTime(null);
 }
@@ -320,6 +325,8 @@ if (visitor.getPunchOutTime() != null) {
     }
 
     visitor.setPunchOutTime(LocalDateTime.now());
+    
+
     return visitorRepository.save(visitor);
 }
 

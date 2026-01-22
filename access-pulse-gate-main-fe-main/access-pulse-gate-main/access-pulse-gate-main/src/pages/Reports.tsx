@@ -331,6 +331,17 @@ const [showDateFilter, setShowDateFilter] = useState(false);
 
 
 
+const formatPunchOut = (dt?: string | null) => {
+  if (!dt) return "-";
+
+  // Trim microseconds to milliseconds
+  const fixed = dt.split(".")[0] + "Z";
+
+  return new Date(fixed).toLocaleString();
+};
+
+
+
 // Add this inside your component, above the return
 const handleExport = () => {
   if (filteredVisitors.length === 0) {
@@ -670,12 +681,19 @@ const handleDateFilter = (date: Date | null) => {
                     <TableCell>{visitor.hostName}</TableCell>
                     <TableCell>{visitor.purposeOfVisit}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {visitor.visitDate + ' ' + visitor.visitTime || '-'}
+                      {/* {visitor.visitDate + ' ' + visitor.visitTime || '-'} */}
+                      {new Date(`${visitor.visitDate}T${visitor.visitTime}`).toLocaleString()}
+
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {visitor.punchOutDateTime
+                      {/* {visitor.punchOutDateTime
                         ? new Date(visitor.punchOutDateTime).toLocaleString()
-                        : '-'}
+                        : '-'} */}
+                        {visitor.punchOutDateTime &&
+ !isNaN(Date.parse(visitor.punchOutDateTime))
+  ? new Date(visitor.punchOutDateTime).toLocaleString()
+  : '-'}
+
                     </TableCell>
                     <TableCell>
                       {visitor.punchOutDateTime ? (
