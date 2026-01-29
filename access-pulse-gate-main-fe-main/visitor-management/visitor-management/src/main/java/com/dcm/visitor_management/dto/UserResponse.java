@@ -9,8 +9,13 @@ public class UserResponse {
     private String employeeCode;
     private String mobile;
     private String name;
+
+    
+    private Boolean isActive;
     
     private LocalDateTime createdAt;
+
+
     
   
     public String getEmployeeCode() {
@@ -45,5 +50,14 @@ public class UserResponse {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+ public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
 
 }

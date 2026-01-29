@@ -123,6 +123,8 @@ export interface Visitor {
   photo?: string; // Base64 image from backend
 
   punchOutDateTime?: string | null; // ✅ Add this
+
+  createdAt: string; 
 }
 
 
@@ -168,4 +170,5 @@ export interface UserReport {
   mobile: string;
   name: string;
   createdAt: string;
+    isActive: boolean; 
 }

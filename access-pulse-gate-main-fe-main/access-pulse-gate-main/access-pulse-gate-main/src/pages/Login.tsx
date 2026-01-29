@@ -11,6 +11,7 @@ import { Loader2, ShieldCheck, RefreshCcw } from "lucide-react";
 import { LoginCredentials, UserLoginCredentials } from "@/types";
 import { authApi } from "@/lib/api";
 import { encryptPassword } from "@/lib/utils";
+import iocl from "../../public/india.png"
 // import { authApi } from "@/api/authApi";
 
 export default function Login() {
@@ -175,18 +176,18 @@ const onSubmit = async (data: LoginCredentials) => {
 
             {/* <ShieldCheck className="w-8 h-8 text-white" /> */}
                       <img
-            src="/IndianOilImage.jpg"
+            src= {iocl}
             alt="DCM Logo"
-            style={{ width: "2cm", height: "2cm" }}
+            style={{ width: "3cm", height: "3cm" }}
 
             className="w-8 h-8 object-contain"
           />
 
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            DCM 
-          </h1>
-          <p className="text-muted-foreground mt-2">Datacenter Management</p>
+          {/* <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            
+          </h1> */}
+          <p className="text-muted-foreground mt-1">Datacenter Management</p>
         </div>
 
         <Card className="shadow-xl border-0 bg-card/80 backdrop-blur">

@@ -262,6 +262,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Role } from '@/types';
+import iocl from "../../../public/India.png"
 
 export function Sidebar() {
   const { employee, user, role, logout } = useAuthStore();
@@ -305,7 +306,7 @@ export function Sidebar() {
       roles: ['admin', 'employee'],
     },
     {
-      name: 'Update',
+      name: 'Change Password',
       href: '/update',
       icon: Edit,
       roles: ['user'],
@@ -355,7 +356,7 @@ export function Sidebar() {
       <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center">
           <img
-            src="/IndianOilImage.jpg"
+            src={iocl}
             alt="DCM Logo"
             className="w-full h-full object-contain"
           />

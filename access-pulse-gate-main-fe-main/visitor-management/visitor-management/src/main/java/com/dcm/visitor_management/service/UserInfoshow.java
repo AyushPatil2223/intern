@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.dcm.visitor_management.dto.UserResponse;
+import com.dcm.visitor_management.entity.UserEntity;
+import com.dcm.visitor_management.entity.UserLogin;
+import com.dcm.visitor_management.repository.UserLoginRepository;
 import com.dcm.visitor_management.repository.UserRepository;
 
 @Service
@@ -13,8 +16,13 @@ public class UserInfoshow {
 
     private final UserRepository userRepository;
 
-    public UserInfoshow(UserRepository userRepository) { // ✅ SAME NAME
+     private final UserLoginRepository userLoginRepository;
+
+    public UserInfoshow(UserRepository userRepository,
+        UserLoginRepository userLoginRepository) { // ✅ SAME NAME
         this.userRepository = userRepository;
+        this.userLoginRepository = userLoginRepository;
+    
     }
 
 
@@ -28,9 +36,11 @@ public class UserInfoshow {
                     dto.setMobile(user.getMobile());
                     dto.setName(user.getName());
                     dto.setCreatedAt(user.getCreatedAt());
+                    dto.setIsActive(user.getIsActive()); // ✅
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
 
+  
 }

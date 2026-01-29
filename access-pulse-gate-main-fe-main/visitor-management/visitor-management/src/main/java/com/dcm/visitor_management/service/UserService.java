@@ -149,6 +149,11 @@ public class UserService {
             return new UserLoginResponse("Invalid username or password", null, null, null, null);
         }
 
+         // ❌ Block inactive users
+        if (!Boolean.TRUE.equals(user.getIsActive())) {
+            return new UserLoginResponse("User is inactive. Contact admin", null, null, null, null);
+        }
+
         if (!"1234".equals(decryptedPassword) &&
             !decryptedPassword.equals(user.getPassword())) {
             return new UserLoginResponse("Invalid username or password", null, null, null, null);

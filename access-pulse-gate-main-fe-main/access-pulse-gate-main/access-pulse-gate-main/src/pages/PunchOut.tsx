@@ -878,6 +878,9 @@ export default function Reports() {
 // To toggle the date picker visibility
 const [showDateFilter, setShowDateFilter] = useState(false);
 
+const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+
+
 
   // Fetch visitors from backend
   const fetchVisitors = async () => {
@@ -926,6 +929,38 @@ const [showDateFilter, setShowDateFilter] = useState(false);
   //   }
   // };
 
+
+
+
+
+
+const formatDateTime = (dateTime?: string | null) => {
+  if (!dateTime) return "-";
+
+  const d = new Date(dateTime);
+  if (isNaN(d.getTime())) return "-";
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  const hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const hour12 = String(hours % 12 || 12).padStart(2, "0");
+
+  return `${day}-${month}-${year} ${hour12}:${minutes} ${ampm}`;
+};
+
+
+
+
+
+
+
+
+
+
 const handleDateFilter = (date: Date | null) => {
   setDateFilter(date); // save selected date
 
@@ -944,7 +979,7 @@ const handleDateFilter = (date: Date | null) => {
     );
   });
 
-  setFilteredVisitors(filtered);
+  setFilteredVisitors(sortVisitors(filtered));
 };
 
 
@@ -1003,41 +1038,68 @@ const handleExport = () => {
 
 
 
+// const handlePunchOut = async (id: number) => {
+//   try {
+//     const response = await visitorApi.punchOutVisitor(id);
+//     toast.success('Punch out successful');
+
+//     // Update the local state first
+//     setVisitors((prev) =>
+//       prev.map((v) =>
+//         v.id === id
+//           ? { ...v, punchOutDateTime: response.data.punchOutDateTime }
+//           : v
+//       )
+//     );
+
+//     setFilteredVisitors((prev) =>
+//       prev.map((v) =>
+//         v.id === id
+//           ? { ...v, punchOutDateTime: response.data.punchOutDateTime }
+//           : v
+//       )
+//     );
+
+//     // Fetch latest visitors from backend and sort them
+//     const latestVisitors = await visitorApi.getAllVisitors();
+//     // const sortedVisitors = latestVisitors.data.sort((a, b) => {
+//     //   if (!a.punchOutDateTime && b.punchOutDateTime) return -1; // active first
+//     //   if (a.punchOutDateTime && !b.punchOutDateTime) return 1;  // punched-out last
+//     //   return 0;
+
+//     const sortedVisitors = sortVisitors(latestVisitors.data);
+
+//     });
+
+//     setVisitors(sortedVisitors);
+//     setFilteredVisitors(sortedVisitors);
+
+//   } catch (err) {
+//     toast.error('Punch out failed');
+//   }
+// };
+
+
+
+
+
 const handlePunchOut = async (id: number) => {
   try {
     const response = await visitorApi.punchOutVisitor(id);
-    toast.success('Punch out successful');
+    toast.success("Punch out successful");
 
-    // Update the local state first
-    setVisitors((prev) =>
-      prev.map((v) =>
-        v.id === id
-          ? { ...v, punchOutDateTime: response.data.punchOutDateTime }
-          : v
-      )
-    );
-
-    setFilteredVisitors((prev) =>
-      prev.map((v) =>
-        v.id === id
-          ? { ...v, punchOutDateTime: response.data.punchOutDateTime }
-          : v
-      )
-    );
-
-    // Fetch latest visitors from backend and sort them
+    // Fetch latest visitors from backend
     const latestVisitors = await visitorApi.getAllVisitors();
-    const sortedVisitors = latestVisitors.data.sort((a, b) => {
-      if (!a.punchOutDateTime && b.punchOutDateTime) return -1; // active first
-      if (a.punchOutDateTime && !b.punchOutDateTime) return 1;  // punched-out last
-      return 0;
-    });
 
+    // ✅ Sort correctly
+    const sortedVisitors = sortVisitors(latestVisitors.data);
+
+    // ✅ Update states once (source of truth)
     setVisitors(sortedVisitors);
     setFilteredVisitors(sortedVisitors);
 
   } catch (err) {
-    toast.error('Punch out failed');
+    toast.error("Punch out failed");
   }
 };
 
@@ -1054,20 +1116,73 @@ const handlePunchOut = async (id: number) => {
         v.mobileNumber.includes(query) ||
         v.companyName.toLowerCase().includes(query.toLowerCase())
     );
-    setFilteredVisitors(filtered);
+    setFilteredVisitors(sortVisitors(filtered));
   };
 
-  // Sort function for initial fetch or new visitors
-  const sortVisitors = (list: Visitor[]) =>
-    list.sort((a, b) => {
-      if (!a.punchOutDateTime && b.punchOutDateTime) return -1;
-      if (a.punchOutDateTime && !b.punchOutDateTime) return 1;
-      return 0;
-    });
+  // // Sort function for initial fetch or new visitors
+  // const sortVisitors = (list: Visitor[]) =>
+  //   list.sort((a, b) => {
+  //     if (!a.punchOutDateTime && b.punchOutDateTime) return -1;
+  //     if (a.punchOutDateTime && !b.punchOutDateTime) return 1;
+  //     return 0;
+  //   });
+
+  // useEffect(() => {
+  //   fetchVisitors();
+  // }, []);
+
+
+// const sortVisitors = (list: Visitor[]) =>
+//   [...list].sort((a, b) => {
+//     // 1️⃣ Active visitors first
+//     if (!a.punchOutDateTime && b.punchOutDateTime) return -1;
+//     if (a.punchOutDateTime && !b.punchOutDateTime) return 1;
+
+//     // 2️⃣ Both punched out → sort by punchOutDateTime ASC (earlier first)
+//     if (a.punchOutDateTime && b.punchOutDateTime) {
+//       return (
+//         new Date(a.punchOutDateTime).getTime() -
+//         new Date(b.punchOutDateTime).getTime()
+//       );
+//     }
+
+//     return 0;
+//   });
+
+
+
+
+
+const sortVisitors = (list: Visitor[]) => {
+  return [...list].sort((a, b) => {
+    // 1️⃣ Active visitors first
+    if (!a.punchOutDateTime && b.punchOutDateTime) return -1;
+    if (a.punchOutDateTime && !b.punchOutDateTime) return 1;
+
+    // 2️⃣ Both punched out → latest punch-out first
+    if (a.punchOutDateTime && b.punchOutDateTime) {
+      return (
+        new Date(b.punchOutDateTime).getTime() -
+        new Date(a.punchOutDateTime).getTime()
+      );
+    }
+
+    // 3️⃣ Both active → latest visit first
+    const aVisit = new Date(`${a.visitDate}T${a.visitTime}`).getTime();
+    const bVisit = new Date(`${b.visitDate}T${b.visitTime}`).getTime();
+
+    return bVisit - aVisit;
+  });
+};
+
 
   useEffect(() => {
-    fetchVisitors();
-  }, []);
+  fetchVisitors();
+}, []);
+
+
+
+
 
   return (
     <div className="space-y-6">
@@ -1171,17 +1286,38 @@ const handlePunchOut = async (id: number) => {
               <TableBody>
                 {filteredVisitors.map((visitor) => (
                   <TableRow key={visitor.id} className="hover:bg-muted/30">
-                    <TableCell>
+                    {/* <TableCell>
   <img
     src={
       visitor.photo
         ? `data:image/jpeg;base64,${visitor.photo}`
-        : '/default-avatar.png'
+        : '/dcm/image.png'
     }
     alt="Visitor"
     className="w-10 h-10 rounded-full object-cover border"
   />
+</TableCell> */}
+
+
+<TableCell>
+  <img
+    src={
+      visitor.photo
+        ? `data:image/jpeg;base64,${visitor.photo}`
+        : '/dcm/image.png'
+    }
+    alt="Visitor"
+    className="w-10 h-10 rounded-full object-cover border cursor-pointer hover:scale-105 transition"
+    onClick={() =>
+      setPreviewPhoto(
+        visitor.photo
+          ? `data:image/jpeg;base64,${visitor.photo}`
+          : '/dcm/image.png'
+      )
+    }
+  />
 </TableCell>
+
 
                     <TableCell className="font-medium">{visitor.fullName}</TableCell>
                     <TableCell>
@@ -1195,12 +1331,14 @@ const handlePunchOut = async (id: number) => {
                     <TableCell>{visitor.hostName}</TableCell>
                     <TableCell>{visitor.purposeOfVisit}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {visitor.visitDate + ' ' + visitor.visitTime || '-'}
+                      {/* {visitor.visitDate + ' ' + visitor.visitTime || '-'} */}
+                      {formatDateTime(`${visitor.visitDate}T${visitor.visitTime}`)}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {visitor.punchOutDateTime
+                      {/* {visitor.punchOutDateTime
                         ? new Date(visitor.punchOutDateTime).toLocaleString()
-                        : '-'}
+                        : '-'} */}
+                        {formatDateTime(visitor.punchOutDateTime)}
                     </TableCell>
                 
                   </TableRow>
@@ -1216,6 +1354,25 @@ const handlePunchOut = async (id: number) => {
           )}
         </CardContent>
       </Card>
+
+
+
+
+
+      {previewPhoto && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+    onClick={() => setPreviewPhoto(null)}
+  >
+    <img
+      src={previewPhoto}
+      alt="Preview"
+      className="max-w-[90%] max-h-[90%] rounded-lg shadow-xl"
+      onClick={(e) => e.stopPropagation()} // prevents close when clicking image
+    />
+  </div>
+)}
+
     </div>
   );
 }

@@ -166,27 +166,56 @@ export default function AddUser() {
     formState: { errors }
   } = useForm<NewUserFormData>();
 
-  const onSubmit = async (data: NewUserFormData) => {
-    try {
-      setLoading(true);
 
-      await userApi.createUser(data); // ✅ backend API call
 
-      toast.success('Engineer created successfully');
+  const handleCreateUser = async (formData: NewUserFormData) => {
+  try {
+    const result = await userApi.createUser(formData);
+    console.log("User created:", result);
+  } catch (error) {
+    console.error("Failed to create user:", error);
+  }
+};
 
-      reset(); // ✅ CLEAR FORM after success
+  // const onSubmit = async (data: NewUserFormData) => {
+  //   try {
+  //     setLoading(true);
 
-      // OPTIONAL
-      // navigate('/reports');
+  //     await userApi.createUser(data); // ✅ backend API call
 
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || 'Failed to create user'
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     toast.success('Engineer created successfully');
+
+  //     reset(); // ✅ CLEAR FORM after success
+
+  //     // OPTIONAL
+  //     // navigate('/reports');
+
+  //   } catch (err: any) {
+  //     toast.error(
+  //       err?.response?.data?.message || 'Failed to create user'
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+
+const onSubmit = async (data: NewUserFormData) => {
+  try {
+    setLoading(true);
+    await userApi.createUser(data); // ✅ emp_code automatically sent
+    toast.success('Engineer created successfully');
+    reset(); // clear form
+  } catch (err: any) {
+    toast.error(err?.response?.data?.message || 'Failed to create user');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -221,7 +250,7 @@ export default function AddUser() {
               )}
             </div>
 
-            {/* Mobile */}
+            {/* Mobile
             <div className="space-y-2">
               <Label>Mobile Number *</Label>
               <Input
@@ -237,7 +266,38 @@ export default function AddUser() {
               {errors.mobile && (
                 <p className="text-sm text-destructive">{errors.mobile.message}</p>
               )}
-            </div>
+            </div> */}
+
+
+
+{/* mobile */}
+<div className="space-y-2">
+  <Label>Mobile Number *</Label>
+  <Input
+    type="tel"
+    inputMode="numeric"
+    maxLength={10} // 🔒 stop typing after 10 digits
+    placeholder="9876543210"
+    {...register('mobile', {
+      required: 'Mobile number is required',
+      pattern: {
+        value: /^[0-9]{10}$/,
+        message: 'Enter valid 10-digit mobile number'
+      }
+    })}
+    onInput={(e) => {
+      const target = e.target as HTMLInputElement;
+      target.value = target.value.replace(/[^0-9]/g, '');
+    }}
+  />
+  {errors.mobile && (
+    <p className="text-sm text-destructive">{errors.mobile.message}</p>
+  )}
+</div>
+
+
+
+
 
             {/* Password */}
             <div className="space-y-2">

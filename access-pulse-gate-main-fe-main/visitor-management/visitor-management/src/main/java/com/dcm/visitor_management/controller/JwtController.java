@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dcm.visitor_management.dto.ApiResponse;
 import com.dcm.visitor_management.dto.EmpLoginReq;
+import com.dcm.visitor_management.entity.UserEntity;
 import com.dcm.visitor_management.entity.UserLogin;
 import com.dcm.visitor_management.helper.JwtUtil;
 import com.dcm.visitor_management.repository.UserLoginRepository;
+import com.dcm.visitor_management.repository.UserRepository;
 import com.dcm.visitor_management.service.EmployeeLoginService;
 import com.dcm.visitor_management.util.EncryptionUtils;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -44,6 +46,10 @@ public class JwtController {
 
 	@Autowired
 	private EmployeeLoginService employeeLoginService;
+
+	@Autowired
+private UserRepository userRepository;
+
 
 	
 	@Autowired
@@ -156,6 +162,32 @@ if (userOpt.isEmpty()) {
 }
 
 UserLogin user = userOpt.get();
+
+
+
+// Optional<UserLogin> userOpt =
+//         userLoginRepository.findByUsername(jwtRequest.getUsername());
+
+// if (userOpt.isEmpty()) {
+//     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//         .body(new ApiResponse<>(false, "Invalid username or password", null));
+// }
+
+// UserLogin user = userOpt.get();
+
+// // 🔴 CHECK FROM users_login ONLY
+// if (!Boolean.TRUE.equals(user.getIsActive())) {
+//     return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//         .body(new ApiResponse<>(
+//             false,
+//             "Your account is inactive. Please contact admin.",
+//             null
+//         ));
+// }
+
+
+
+
 
 System.out.println("USERNAME       = [" + jwtRequest.getUsername() + "]");
 System.out.println("DB PASSWORD    = [" + user.getPassword() + "]");

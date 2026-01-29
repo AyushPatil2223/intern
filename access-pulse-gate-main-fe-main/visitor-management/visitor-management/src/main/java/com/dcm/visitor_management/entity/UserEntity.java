@@ -30,9 +30,15 @@ public class UserEntity {
     @Column(nullable = false)
     private String role;
 
+     // ✅ NEW FIELD
+    @Column(nullable = false)
+    private Boolean isActive = true;
+
+
         @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.isActive = true; // default ACTIVE
     }
 
 
@@ -116,5 +122,13 @@ public class UserEntity {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+     public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 }

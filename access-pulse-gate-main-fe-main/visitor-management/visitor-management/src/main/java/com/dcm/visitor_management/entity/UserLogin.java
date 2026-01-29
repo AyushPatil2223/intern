@@ -21,14 +21,14 @@ public class UserLogin {
     private String role;
 
     @Column(name = "is_active")
-    private String isActive;
+    private Boolean isActive;
 
     // Default constructor
     public UserLogin() {
     }
 
     // Parameterized constructor
-    public UserLogin(Long id, String username, String password, String role, String isActive) {
+    public UserLogin(Long id, String username, String password, String role, Boolean isActive) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -69,11 +69,11 @@ public class UserLogin {
         this.role = role;
     }
 
-    public String getIsActive() {
+    public Boolean getIsActive() {
         return isActive;
     }
 
-    public void setIsActive(String isActive) {
+    public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 

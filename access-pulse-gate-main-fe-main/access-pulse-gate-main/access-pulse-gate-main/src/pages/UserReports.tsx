@@ -39,31 +39,100 @@ export default function UserReports() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch users
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await userApi.ShowUsers(); // /auth/all
-      setUsers(response.data);
-      setFilteredUsers(response.data);
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to fetch users');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // // Fetch users
+  // const fetchUsers = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await userApi.ShowUsers(); // /auth/all
+  //     setUsers(response.data);
+  //     setFilteredUsers(response.data);
+  //   } catch (err: any) {
+  //     toast.error(err?.message || 'Failed to fetch users');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  // Search filter
+
+
+  // After fetching users
+const fetchUsers = async () => {
+  try {
+    setLoading(true);
+    const response = await userApi.ShowUsers(); // /auth/all
+
+    // Sort users: Active first, then Inactive, and by createdAt descending
+    const sortedUsers = response.data.sort((a: UserReport, b: UserReport) => {
+      if (a.isActive && !b.isActive) return -1; // Active first
+      if (!a.isActive && b.isActive) return 1;  // Inactive last
+      // Both same status, sort by createdAt descending (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    setUsers(sortedUsers);
+    setFilteredUsers(sortedUsers);
+  } catch (err: any) {
+    toast.error(err?.message || 'Failed to fetch users');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
+const toggleStatus = async (mobile: string, status: boolean) => {
+  try {
+    await userApi.updateUserStatus(mobile, status); // ✅ Mobile number
+    toast.success(status ? 'User Activated' : 'User Deactivated');
+    fetchUsers(); // reload table
+  } catch {
+    toast.error('Failed to update status');
+  }
+};
+
+
+
+
+
+
+
+
+  // // Search filter
+  // const handleSearch = (query: string) => {
+  //   setSearchQuery(query);
+  //   const filtered = users.filter(
+  //     (u) =>
+  //       u.name.toLowerCase().includes(query.toLowerCase()) ||
+  //       u.mobile.includes(query) ||
+  //       u.employeeCode.toLowerCase().includes(query.toLowerCase())
+  //   );
+  //   setFilteredUsers(filtered);
+  // };
+
+
+
+
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    const filtered = users.filter(
+  setSearchQuery(query);
+  const filtered = users
+    .filter(
       (u) =>
         u.name.toLowerCase().includes(query.toLowerCase()) ||
         u.mobile.includes(query) ||
         u.employeeCode.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredUsers(filtered);
-  };
+    )
+    .sort((a, b) => {
+      if (a.isActive && !b.isActive) return -1;
+      if (!a.isActive && b.isActive) return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+  setFilteredUsers(filtered);
+};
+
+
+
 
   useEffect(() => {
     fetchUsers();
@@ -119,6 +188,9 @@ export default function UserReports() {
 <TableHead>Mobile</TableHead>
 <TableHead>Employee Code</TableHead>
 <TableHead>Created At</TableHead>
+<TableHead>Status</TableHead>
+<TableHead>Action</TableHead>
+
 
                 </TableRow>
               </TableHeader>
@@ -134,6 +206,44 @@ export default function UserReports() {
 <TableCell className="text-sm text-muted-foreground">
   {new Date(user.createdAt).toLocaleString()}
 </TableCell>
+<TableCell>
+  {/* <Badge variant={user.isActive ? 'success' : 'destructive'}>
+    {user.isActive ? 'Active' : 'Inactive'}
+  </Badge> */}
+
+  <Badge
+  variant={user.isActive ? "default" : "destructive"}
+  className={
+    user.isActive
+      ? "bg-green-600 hover:bg-green-600 text-white"
+      : ""
+  }
+>
+  {user.isActive ? "Active" : "Inactive"}
+</Badge>
+
+</TableCell>
+
+<TableCell>
+  {user.isActive ? (
+    <Button
+      size="sm"
+      variant="destructive"
+      onClick={() => toggleStatus(user.mobile, false)}
+    >
+      Deactivate
+    </Button>
+  ) : (
+    <Button
+      size="sm"
+      variant="default"
+      onClick={() => toggleStatus(user.mobile, true)}
+    >
+      Activate
+    </Button>
+  )}
+</TableCell>
+
 
                   </TableRow>
                 ))}
